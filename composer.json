@@ -1,0 +1,25 @@
+{
+  "repositories": {
+    "packagist": {
+      "type": "composer",
+      "url": "https://packagist.phpcomposer.com"
+    }
+  },
+
+  "require": {
+    "noahbuscher/macaw": "dev-master",
+    "illuminate/database": "*",
+    "justinrainbow/json-schema": "^5.2",
+    "phpoffice/phpexcel": "1.8.*"
+  },
+
+  "autoload": {
+    "classmap": [
+      "app/controllers",
+      "app/model",
+      "app/core",
+      "app/libraries",
+      "app/helpers"
+    ]
+  }
+}
