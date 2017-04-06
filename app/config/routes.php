@@ -15,8 +15,6 @@ Macaw::get('(:all)', function($fu) {
     echo '未匹配到路由<br>'.$fu;
 });
 
-Macaw::post('', 'HomeController@my');
-
-Macaw::post('/excel', 'HomeController@testExcel');
+Macaw::post('', 'HomeController@demoExcel');
 
 Macaw::dispatch();
