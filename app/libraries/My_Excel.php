@@ -42,6 +42,12 @@ class My_Excel
         $this->fileName = $fileName . '.xlsx';
     }
 
+    /** ##############################---设置excel样式---开始---######################################### */
+    public function setStyle()
+    {
+        $this->excelObj->getActiveSheet()->getDefaultStyle()->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_CENTER);
+    }
+    /** ##############################---设置excel样式---结束---######################################### */
     /**
      * 设置标题
      *
@@ -95,7 +101,7 @@ class My_Excel
         //循环读取每个单元格的数据
         $data = [];
         for ($row; $row <= $highestRow; $row++) {
-            $rowData = $sheet->rangeToArray('A' . $row . ':' . $highestColumm . $row, NULL, TRUE, FALSE);
+            $rowData = $sheet->rangeToArray('A' . $row . ':' . $highestColumm . $row, null, true, false);
             $data[] = $rowData[0];
         }
 
@@ -130,7 +136,6 @@ class My_Excel
     /** ##################################---获取excel数据----结束---##################################### */
 
 
-
     /** ##################################---处理头补数据----开始---##################################### */
     /**
      * 设置头部
@@ -140,7 +145,7 @@ class My_Excel
      *          'col' =>['平台','媒体','对接方式','时长','市场',],]
      * @param $startRow 开始行
      */
-    public function setheader($header, $startRow,$path)
+    public function setheader($header, $startRow, $path)
     {
         $row = array_values($header['row']);
         $col = $header['col'];
@@ -150,14 +155,13 @@ class My_Excel
         //处理col列
         $excelColChar = $this->getChar($colNum);
         $excelColCharResult = [];
-        foreach ($excelColChar as $excelColCharKey=>$excelColCharValue) {
-            $excelColCharResult[$excelColCharKey] = $excelColCharValue.$startRow;
+        foreach ($excelColChar as $excelColCharKey => $excelColCharValue) {
+            $excelColCharResult[$excelColCharKey] = $excelColCharValue . $startRow;
         }
+
         $colResult = array_combine($excelColCharResult, $col);
-
-        //处理row列
+        //处理row列 从count(col)后开始
         $excelRowChar = $this->getChar($colNum + $rowNum);
-
         $result = $resultHeader = [];
         for ($i = 0; $i < $rowNum; $i++) {
             for ($j = 0; $j < count($header['row']); $j++) {
@@ -165,18 +169,18 @@ class My_Excel
                 $resultHeader[$excelRowChar[$i + $colNum] . ($j + $startRow)] = $arrDika[$i][$j];
             }
         }
-
         //合并列
-        foreach ($excelColChar as $key=>$value){
-            $colMerge[] = $value.$startRow.':'.$value.(count($row)+$startRow-1);
+        foreach ($excelColChar as $key => $value) {
+            $colMerge[] = $value . $startRow . ':' . $value . (count($row) + $startRow - 1);
         }
-        $resultColRow = array_merge($colResult,$resultHeader);
+
+        $resultColRow = array_merge($colResult, $resultHeader);
+        //合并行
         $merge = $this->merge($result);
         $this->writeHeaderExcel($resultColRow);
         $this->writeMergeExcel($merge);
         $this->writeMergeExcel($colMerge);
         $this->saveExcelFile($path);
-
 
 
         //写入数据
@@ -199,21 +203,20 @@ class My_Excel
 
     public function writeHeaderExcel($resultHeader)
     {
-        foreach ($resultHeader as $key=>$value){
+        foreach ($resultHeader as $key => $value) {
             $this->excelObj->setActiveSheetIndex($this->sheet)->setCellValue($key, ' ' . $value);
         }
     }
 
     public function writeMergeExcel($result)
     {
-        foreach ($result as $key=>$value){
-            $this->excelObj->setActiveSheetIndex($this->sheet)->mergeCells(''.$value);
+        foreach ($result as $key => $value) {
+            $this->excelObj->setActiveSheetIndex($this->sheet)->mergeCells('' . $value);
         }
     }
 
     public function merge($result)
     {
-
         //获取要合并的数组 按紧邻的值相同的取得该键组成数组
         $tempMerge = [];
         foreach ($result as $resultKey => $resultValue) {
@@ -221,7 +224,7 @@ class My_Excel
             $i = 0;
             foreach ($resultValue as $key => $value) {
                 if (!empty($oldvalue)) {
-                    if($oldvalue !== $value){
+                    if ($oldvalue !== $value) {
                         $i++;
                     }
                 }
@@ -290,11 +293,136 @@ class My_Excel
     {
         $keys = [];
         $ch = [
-            'AA', 'AB', 'AC', 'AD', 'AE', 'AF', 'AG', 'AH', 'AI', 'AJ', 'AK', 'AL', 'AM', 'AN', 'AO', 'AP', 'AQ', 'AR', 'AS', 'AT', 'AU', 'AV', 'AW', 'AX', 'AY', 'AZ',
-            'BA', 'BB', 'BC', 'BD', 'BE', 'BF', 'BG', 'BH', 'BI', 'BJ', 'BK', 'BL', 'BM', 'BN', 'BO', 'BP', 'BQ', 'BR', 'BS', 'BT', 'BU', 'BV', 'BW', 'BX', 'BY', 'BZ',
-            'CA', 'CB', 'CC', 'CD', 'CE', 'CF', 'CG', 'CH', 'CI', 'CJ', 'CK', 'CL', 'CM', 'CN', 'CO', 'CP', 'CQ', 'CR', 'CS', 'CT', 'CU', 'CV', 'CW', 'CX', 'CY', 'CZ',
-            'DA', 'DB', 'DC', 'DD', 'DE', 'DF', 'DG', 'DH', 'DI', 'DJ', 'DK', 'DL', 'DM', 'DN', 'DO', 'DP', 'DQ', 'DR', 'DS', 'DT', 'DU', 'DV', 'DW', 'DX', 'DY', 'DZ',
-            'EA', 'EB', 'EC', 'ED', 'EE', 'EF', 'EG', 'EH', 'EI', 'EJ', 'EK', 'EL', 'EM', 'EN', 'EO', 'EP', 'EQ', 'ER', 'ES', 'ET', 'EU', 'EV', 'EW', 'EX', 'EY', 'EZ',
+            'AA',
+            'AB',
+            'AC',
+            'AD',
+            'AE',
+            'AF',
+            'AG',
+            'AH',
+            'AI',
+            'AJ',
+            'AK',
+            'AL',
+            'AM',
+            'AN',
+            'AO',
+            'AP',
+            'AQ',
+            'AR',
+            'AS',
+            'AT',
+            'AU',
+            'AV',
+            'AW',
+            'AX',
+            'AY',
+            'AZ',
+            'BA',
+            'BB',
+            'BC',
+            'BD',
+            'BE',
+            'BF',
+            'BG',
+            'BH',
+            'BI',
+            'BJ',
+            'BK',
+            'BL',
+            'BM',
+            'BN',
+            'BO',
+            'BP',
+            'BQ',
+            'BR',
+            'BS',
+            'BT',
+            'BU',
+            'BV',
+            'BW',
+            'BX',
+            'BY',
+            'BZ',
+            'CA',
+            'CB',
+            'CC',
+            'CD',
+            'CE',
+            'CF',
+            'CG',
+            'CH',
+            'CI',
+            'CJ',
+            'CK',
+            'CL',
+            'CM',
+            'CN',
+            'CO',
+            'CP',
+            'CQ',
+            'CR',
+            'CS',
+            'CT',
+            'CU',
+            'CV',
+            'CW',
+            'CX',
+            'CY',
+            'CZ',
+            'DA',
+            'DB',
+            'DC',
+            'DD',
+            'DE',
+            'DF',
+            'DG',
+            'DH',
+            'DI',
+            'DJ',
+            'DK',
+            'DL',
+            'DM',
+            'DN',
+            'DO',
+            'DP',
+            'DQ',
+            'DR',
+            'DS',
+            'DT',
+            'DU',
+            'DV',
+            'DW',
+            'DX',
+            'DY',
+            'DZ',
+            'EA',
+            'EB',
+            'EC',
+            'ED',
+            'EE',
+            'EF',
+            'EG',
+            'EH',
+            'EI',
+            'EJ',
+            'EK',
+            'EL',
+            'EM',
+            'EN',
+            'EO',
+            'EP',
+            'EQ',
+            'ER',
+            'ES',
+            'ET',
+            'EU',
+            'EV',
+            'EW',
+            'EX',
+            'EY',
+            'EZ',
         ];
         for ($number = 1; $number <= $colNumber; $number++) {
             $divisor = intval($number / 26.01);

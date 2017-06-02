@@ -18,10 +18,11 @@ class HomeController extends \core\MY_Controller
 
     }
 
-    public function index()
+    public function getList()
     {
         $this->checkSchema();
         $array = Customer::get()->toArray();
+        echo 1;
         var_dump($array);
         die;
     }
@@ -40,12 +41,15 @@ class HomeController extends \core\MY_Controller
 
         /** @var  生成excel demo */
         echo "生成excel开始<br/>";
+        $excel->setSheet(1,'标签2');
+        $excel->setStyle();
         $this->header = $this->header();
-        $url = PUBLIC_PATH . "/hqqgggqq444.xlsx";
+        $url = PUBLIC_PATH . "/hq.xlsx";
         $excel->setheader($this->header(), 1,$url);
         echo "生成excel结束<br/>";
         die;
     }
+
 
     public function header()
     {
