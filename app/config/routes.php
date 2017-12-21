@@ -9,12 +9,13 @@
 
 use libraries\My_Macaw as Macaw;
 
-Macaw::post('', 'HomeController@getList');
+Macaw::post('/a', 'HomeController@getList');
+Macaw::get('', 'HomeController@getList');
 
 Macaw::get('(:all)', function($fu) {
     echo '未匹配到路由<br>'.$fu;
 });
 
-Macaw::post('/excel', 'HomeController@demoExcel');
+Macaw::get('/excel', 'HomeController@demoExcel');
 
 Macaw::dispatch();

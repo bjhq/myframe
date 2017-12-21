@@ -6,7 +6,6 @@
  * Time: 15:53
  */
 
-
 // 定义 PUBLIC_PATH
 
 define('PUBLIC_PATH', __DIR__);

@@ -26,6 +26,11 @@ class My_Excel
     protected $sheet = 0;
 
     /**
+     * @var 设置sheet
+     */
+    protected $headerNum = 0;
+
+    /**
      * My_Excel constructor.
      */
     public function __construct()
@@ -88,7 +93,7 @@ class My_Excel
      *
      * @return mixed
      */
-    public function getBodyData($excelUrl, $row = 1)
+    public function getBodyData($excelUrl, $row = 1, $isValue = false)
     {
         $inputFileType = \PHPExcel_IOFactory::identify($excelUrl);
         $reader = \PHPExcel_IOFactory::createReader($inputFileType);
@@ -105,7 +110,7 @@ class My_Excel
             $data[] = $rowData[0];
         }
 
-        $result = $this->getMergeValue($data);
+        $result = $this->getMergeValue($data,$isValue);
         if ($result) {
             $returnData = [
                 'rowNum' => $cols,
@@ -122,12 +127,16 @@ class My_Excel
      * @param $data
      * @return array
      */
-    private function getMergeValue($data)
+    private function getMergeValue($data,$isValue)
     {
         $result = [];
         foreach ($data as $dataKey => $dataValue) {
             foreach ($dataValue as $key => $value) {
-                $result[$dataKey][$key] = is_null($dataValue[$key]) ? $result[$dataKey - 1][$key] : $dataValue[$key];
+                if (!$isValue){
+                    $result[$dataKey][$key] = (is_null($dataValue[$key]) && $dataKey > 1) ? $result[$dataKey - 1][$key] : $dataValue[$key];
+                }else{
+                    $result[$dataKey][$key] = !empty($dataValue[$key])?$dataValue[$key]:'';
+                }
             }
         }
         return $result;
@@ -145,9 +154,11 @@ class My_Excel
      *          'col' =>['平台','媒体','对接方式','时长','市场',],]
      * @param $startRow 开始行
      */
-    public function setheader($header, $startRow, $path)
+    public function setheader($header, $startRow)
     {
         $row = array_values($header['row']);
+        //头部占用的行
+        $this->headerNum = count($row);
         $col = $header['col'];
         $colNum = count($col);
         $arrDika = $this->combineDika($row);
@@ -164,14 +175,14 @@ class My_Excel
         $excelRowChar = $this->getChar($colNum + $rowNum);
         $result = $resultHeader = [];
         for ($i = 0; $i < $rowNum; $i++) {
-            for ($j = 0; $j < count($header['row']); $j++) {
+            for ($j = 0; $j < $this->headerNum; $j++) {
                 $result[$j][$excelRowChar[$i + $colNum] . ($j + $startRow)] = $arrDika[$i][$j];
                 $resultHeader[$excelRowChar[$i + $colNum] . ($j + $startRow)] = $arrDika[$i][$j];
             }
         }
         //合并列
         foreach ($excelColChar as $key => $value) {
-            $colMerge[] = $value . $startRow . ':' . $value . (count($row) + $startRow - 1);
+            $colMerge[] = $value . $startRow . ':' . $value . ($this->headerNum + $startRow - 1);
         }
 
         $resultColRow = array_merge($colResult, $resultHeader);
@@ -180,12 +191,32 @@ class My_Excel
         $this->writeHeaderExcel($resultColRow);
         $this->writeMergeExcel($merge);
         $this->writeMergeExcel($colMerge);
+    }
+
+    /**
+     * 拼接excel正文
+     * @param $body 正文
+     */
+    public function writeBody($body){
+        $body = array_values($body);
+        $keys = $this->getChar($body[0]);
+        foreach ($body as $i => $vo) {
+            //$j 控制列
+            $j = 0;
+            foreach ($vo as $key => $item) {
+                // 设置数据格式
+                $this->excelObj->setActiveSheetIndex($this->sheet)->setCellValue($keys[$j] . $this->headerNum+$i, ' '.$item);
+                $j++;
+            }
+        }
+
+    }
+
+    /**
+     * @param $path 保存excel
+     */
+    public function saveExcel($path){
         $this->saveExcelFile($path);
-
-
-        //写入数据
-
-
     }
 
     /**

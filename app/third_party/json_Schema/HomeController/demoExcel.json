@@ -1,9 +1,1 @@
-{
-  "type": "object",
-  "properties": {
-    "campaign_id": {
-      "type": "integer",
-      "required": true
-    }
-  }
-}
+{}
